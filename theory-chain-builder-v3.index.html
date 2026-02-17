@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theory Chain Builder: Instructivism vs Social Constructivism</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .instructions {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .instructions h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .theory-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .theory-button {
+            padding: 15px 30px;
+            border: 3px solid #e2e8f0;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #4a5568;
+        }
+
+        .theory-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .theory-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .theory-button.instructivism.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-color: #f5576c;
+        }
+
+        .chain-container {
+            display: none;
+        }
+
+        .chain-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Theory intro box */
+        .theory-intro-box {
+            background: #f7fafc;
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+        }
+
+        .instructivism-chain .theory-intro-box {
+            border-left-color: #f5576c;
+        }
+
+        .theory-intro-box h3 {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .instructivism-chain .theory-intro-box h3 {
+            color: #c53030;
+        }
+
+        .theory-intro-box p {
+            font-size: 0.95em;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        .theory-intro-box .theorists {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #718096;
+            font-style: italic;
+        }
+
+        .chain-step {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .chain-step:hover {
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .chain-step::after {
+            content: '↓';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2em;
+            color: #cbd5e0;
+            font-weight: bold;
+        }
+
+        .chain-step:last-child::after {
+            display: none;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .instructivism-chain .step-number {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .step-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .step-subtitle {
+            font-size: 0.82em;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .step-description {
+            color: #718096;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        .input-area {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            color: #2d3748;
+            background: #fff;
+        }
+
+        .input-area:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .instructivism-chain .input-area:focus {
+            border-color: #f5576c;
+            box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+        }
+
+        .input-area.support-area {
+            min-height: 140px;
+        }
+
+        .example-toggle {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #edf2f7;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: #4a5568;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .example-toggle:hover {
+            background: #e2e8f0;
+        }
+
+        .example-content {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #ebf8ff;
+            border-radius: 10px;
+            border-left: 4px solid #4299e1;
+        }
+
+        .instructivism-chain .example-content {
+            background: #fff5f5;
+            border-left-color: #f5576c;
+        }
+
+        .example-content.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .example-content h5 {
+            color: #2c5282;
+            margin-bottom: 12px;
+            font-size: 1em;
+            font-weight: 700;
+        }
+
+        .instructivism-chain .example-content h5 {
+            color: #c53030;
+        }
+
+        .example-content p {
+            color: #2d3748;
+            font-size: 0.93em;
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .example-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-content .cite {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #bee3f8;
+            font-size: 0.85em;
+            color: #4a5568;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .instructivism-chain .example-content .cite {
+            border-top-color: #fed7d7;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .save-button {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .clear-button {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .compare-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .saved-message {
+            display: none;
+            padding: 15px;
+            background: #c6f6d5;
+            color: #22543d;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .saved-message.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .comparison-view {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            background: #f7fafc;
+            border-radius: 15px;
+        }
+
+        .comparison-view.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .comparison-view h2 {
+            color: #2d3748;
+            margin-bottom: 6px;
+            font-size: 1.6em;
+        }
+
+        .comparison-view .comparison-sub {
+            color: #718096;
+            font-style: italic;
+            margin-bottom: 24px;
+            font-size: 0.95em;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .comparison-column h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            font-size: 1.2em;
+        }
+
+        .comparison-column.constructivism h3 {
+            color: #667eea;
+            border-color: #667eea;
+        }
+
+        .comparison-column.instructivism h3 {
+            color: #f5576c;
+            border-color: #f5576c;
+        }
+
+        .comparison-item {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .comparison-item h4 {
+            font-size: 0.9em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .comparison-item p {
+            color: #4a5568;
+            font-size: 0.92em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .empty-state {
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .content { padding: 20px; }
+            .theory-selector { flex-direction: column; }
+            .theory-button { width: 100%; }
+            .comparison-grid { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+            .action-button { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>🔗 Theory Chain Builder</h1>
+        <p>Compare Instructivism &amp; Social Constructivism in Adult Online Learning</p>
+    </div>
+
+    <div class="content">
+
+        <div class="instructions">
+            <h2>How to Use This Tool</h2>
+            <p><strong>Goal:</strong> Build evidence-based theory chains that analyse how instructivism and social constructivism operate in adult online learning contexts, grounded in seminal scholarship.</p>
+            <p style="margin-top:10px;"><strong>Structure:</strong> Claim (theory) → Evidence (moment) → Mechanism (why) → Impact (learner) → Scholarly support</p>
+            <p style="margin-top:10px;"><strong>Instructions:</strong> Select a learning theory below, work through each step of the chain, and use the <em>See Example</em> buttons for guidance. When you've completed both chains, click <strong>Compare Both</strong> to see them side by side.</p>
+        </div>
+
+        <div class="theory-selector">
+            <button class="theory-button active" onclick="showTheory('constructivism', this)">
+                📚 Social Constructivism
+            </button>
+            <button class="theory-button instructivism" onclick="showTheory('instructivism', this)">
+                🎓 Instructivism
+            </button>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             SOCIAL CONSTRUCTIVISM CHAIN
+        ════════════════════════════════════════ -->
+        <div id="constructivism-chain" class="chain-container constructivism-chain active">
+
+            <div class="theory-intro-box">
+                <h3>About Social Constructivism</h3>
+                <p>Social constructivism holds that knowledge is not transmitted but <em>co-constructed</em> through social interaction and collaborative meaning-making. Learning occurs within the Zone of Proximal Development (ZPD), mediated by more capable peers, instructors, or cultural tools. In adult education, this tradition underpins problem-based learning, collaborative inquiry, and communities of practice.</p>
+                <span class="theorists">Key theorists: Vygotsky (1978) · Bruner (1960) · Lave &amp; Wenger (1991) · Garrison, Anderson &amp; Archer (2000)</span>
+            </div>
+
+            <!-- Step 1: Claim -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Claim</span>
+                        <span class="step-subtitle">The theoretical proposition</span>
+                    </div>
+                </div>
+                <p class="step-description">What does social constructivism claim about how adults learn? Ground your claim in the theoretical literature.</p>
+                <textarea class="input-area" id="sc-claim" placeholder="e.g. Vygotsky (1978) argues that all higher cognitive functions originate in social interaction before being internalised by the individual…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('sc-claim-ex', this)">💡 See Example</button>
+                <div class="example-content" id="sc-claim-ex">
+                    <h5>Example Claim</h5>
+                    <p>Social constructivism holds that adult learners develop understanding through collaborative dialogue and the negotiation of meaning with others. Knowledge is not received but actively co-constructed within social contexts (Vygotsky, 1978). In online environments, this positions discussion, peer critique, and collaborative problem-solving as the primary vehicles for learning — not content delivery alone. Lave and Wenger (1991) extend this by arguing that learning is inseparable from the communities of practice in which it occurs: adults learn by participating in authentic tasks alongside more experienced others.</p>
+                    <p class="cite">Vygotsky, L. S. (1978). <em>Mind in society: The development of higher psychological processes.</em> Harvard University Press. | Lave, J., &amp; Wenger, E. (1991). <em>Situated learning: Legitimate peripheral participation.</em> Cambridge University Press.</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Evidence -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Evidence</span>
+                        <span class="step-subtitle">A specific, grounded moment</span>
+                    </div>
+                </div>
+                <p class="step-description">Describe one concrete scenario from adult online learning that puts this claim to the test. Be specific: what was the task, the modality, the learner behaviour?</p>
+                <textarea class="input-area" id="sc-evidence" placeholder="Describe a single, detailed scenario — e.g. a specific course design moment from a real or plausible online learning context…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('sc-evidence-ex', this)">💡 See Example</button>
+                <div class="example-content" id="sc-evidence-ex">
+                    <h5>Example Evidence</h5>
+                    <p>In a fully asynchronous online MBA programme, students participated in mandatory discussion board activities over 15 weeks. Each week, a real-world business problem was posted as the prompt. Students were required to post their own analytical response and to offer substantive feedback to at least two peers before the week closed. The task format, length, and argumentative approach were left deliberately open. Some students produced richly referenced posts and engaged in extended critical dialogue; others posted minimally and responded to peers with little depth. Completion rates were high but the quality of peer interaction varied substantially across the cohort.</p>
+                    <p class="cite">Illustrative scenario drawing on: Garrison, D. R., Anderson, T., &amp; Archer, W. (2000). Critical inquiry in a text-based environment. <em>The Internet and Higher Education, 2</em>(2–3), 87–105. https://doi.org/10.1016/S1096-7516(00)00016-6</p>
+                </div>
+            </div>
+
+            <!-- Step 3: Mechanism -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Mechanism</span>
+                        <span class="step-subtitle">Why it works — or why it hinders</span>
+                    </div>
+                </div>
+                <p class="step-description">Explain the cognitive, social, or structural mechanism at play. What theoretical concepts — ZPD, scaffolding, community of practice, cognitive load — help explain the outcome?</p>
+                <textarea class="input-area" id="sc-mechanism" placeholder="e.g. Peer dialogue within the ZPD requires a more capable other to extend understanding. Without structured scaffolding, learners at similar levels may recirculate existing knowledge rather than advance it…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('sc-mechanism-ex', this)">💡 See Example</button>
+                <div class="example-content" id="sc-mechanism-ex">
+                    <h5>Example Mechanism</h5>
+                    <p><strong>When it works:</strong> Where students brought different knowledge bases and professional experience, the discussion board functioned as a genuine community of practice (Lave &amp; Wenger, 1991) — learners moved toward fuller participation through exposure to more expert discourse. Bruner's (1960) concept of the spiral curriculum also applies: revisiting the same business problem through multiple peer perspectives deepened conceptual understanding.</p>
+                    <p><strong>When it hinders:</strong> Without explicit scaffolding, many interactions remained at the surface level — what Garrison et al. (2000) identify as the "sharing and comparing" phase of practical inquiry, rarely reaching "integration" or "resolution." The asynchronous modality delayed feedback, disrupting the dialogic immediacy Vygotsky saw as central to ZPD activity. Open-ended task formats also increased extraneous cognitive load (Sweller, 1988), leaving many learners uncertain how deeply to engage.</p>
+                    <p class="cite">Bruner, J. S. (1960). <em>The process of education.</em> Harvard University Press. | Sweller, J. (1988). Cognitive load during problem solving. <em>Cognitive Science, 12</em>(2), 257–285. https://doi.org/10.1207/s15516709cog1202_4</p>
+                </div>
+            </div>
+
+            <!-- Step 4: Impact -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Impact</span>
+                        <span class="step-subtitle">Effect on the adult online learner</span>
+                    </div>
+                </div>
+                <p class="step-description">What was the actual effect on learners? Consider engagement, depth of understanding, equity, motivation, and longer-term transfer of learning.</p>
+                <textarea class="input-area" id="sc-impact" placeholder="e.g. For learners with strong self-regulation, collaborative tasks deepened application of theory to practice. For others, the absence of scaffolding produced surface compliance rather than genuine inquiry…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('sc-impact-ex', this)">💡 See Example</button>
+                <div class="example-content" id="sc-impact-ex">
+                    <h5>Example Impact</h5>
+                    <p><strong>Positive:</strong> Students with strong metacognitive skills and high domain knowledge reported that peer exchange challenged their thinking and surfaced assumptions they had not examined. Several described the discussion as more intellectually rigorous than face-to-face seminars, precisely because they had time to compose and revise their reasoning before posting.</p>
+                    <p><strong>Negative:</strong> Students who were less confident in the subject domain found the open-ended format overwhelming. Without a more knowledgeable other (Vygotsky, 1978) to scaffold their thinking in real time, they defaulted to agreement rather than critical dialogue. Ismailov and Chiu (2022) found that fully asynchronous course designs consistently failed to satisfy learners' need for relatedness, suggesting that social constructivism's promise of genuine community may depend on modality choices not always available in purely asynchronous settings.</p>
+                    <p class="cite">Ismailov, M., &amp; Chiu, T. K. F. (2022). Catering to inclusion and diversity with UDL in asynchronous online education. <em>Frontiers in Psychology, 13</em>, Article 819884. https://doi.org/10.3389/fpsyg.2022.819884</p>
+                </div>
+            </div>
+
+            <!-- Step 5: Scholarly Support -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Scholarly Support</span>
+                        <span class="step-subtitle">APA 7 references</span>
+                    </div>
+                </div>
+                <p class="step-description">Cite the key sources that ground your analysis. Use APA 7 format. Aim for seminal theoretical works alongside contemporary empirical studies.</p>
+                <textarea class="input-area support-area" id="sc-support" placeholder="Vygotsky, L. S. (1978)…&#10;Lave, J., &amp; Wenger, E. (1991)…&#10;Garrison, D. R., et al. (2000)…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('sc-support-ex', this)">💡 See Example</button>
+                <div class="example-content" id="sc-support-ex">
+                    <h5>Example Scholarly Support (APA 7)</h5>
+                    <p>Bruner, J. S. (1960). <em>The process of education.</em> Harvard University Press.</p>
+                    <p>Garrison, D. R., Anderson, T., &amp; Archer, W. (2000). Critical inquiry in a text-based environment. <em>The Internet and Higher Education, 2</em>(2–3), 87–105. https://doi.org/10.1016/S1096-7516(00)00016-6</p>
+                    <p>Ismailov, M., &amp; Chiu, T. K. F. (2022). Catering to inclusion and diversity with UDL in asynchronous online education. <em>Frontiers in Psychology, 13</em>, Article 819884. https://doi.org/10.3389/fpsyg.2022.819884</p>
+                    <p>Lave, J., &amp; Wenger, E. (1991). <em>Situated learning: Legitimate peripheral participation.</em> Cambridge University Press.</p>
+                    <p>Sweller, J. (1988). Cognitive load during problem solving. <em>Cognitive Science, 12</em>(2), 257–285. https://doi.org/10.1207/s15516709cog1202_4</p>
+                    <p>Vygotsky, L. S. (1978). <em>Mind in society: The development of higher psychological processes.</em> Harvard University Press.</p>
+                </div>
+            </div>
+
+        </div><!-- end constructivism-chain -->
+
+
+        <!-- ═══════════════════════════════════════
+             INSTRUCTIVISM CHAIN
+        ════════════════════════════════════════ -->
+        <div id="instructivism-chain" class="chain-container instructivism-chain">
+
+            <div class="theory-intro-box">
+                <h3>About Instructivism</h3>
+                <p>Instructivism holds that explicit, structured teaching by a knowledgeable instructor is the most reliable route to learning, particularly for novice learners who lack the schemas needed to benefit from unguided discovery. Anchored in Gagné's conditions of learning and Ausubel's advance organisers, it argues that managing cognitive load through careful sequencing and direct instruction produces durable, transferable knowledge.</p>
+                <span class="theorists">Key theorists: Gagné (1965) · Ausubel (1968) · Sweller (1988) · Kirschner, Sweller &amp; Clark (2006)</span>
+            </div>
+
+            <!-- Step 1: Claim -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Claim</span>
+                        <span class="step-subtitle">The theoretical proposition</span>
+                    </div>
+                </div>
+                <p class="step-description">What does instructivism claim about how adults learn? Ground your claim in the theoretical literature.</p>
+                <textarea class="input-area" id="inst-claim" placeholder="e.g. Kirschner, Sweller &amp; Clark (2006) argue that minimally guided instruction fails because it ignores the structure of human cognitive architecture…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('inst-claim-ex', this)">💡 See Example</button>
+                <div class="example-content" id="inst-claim-ex">
+                    <h5>Example Claim</h5>
+                    <p>Instructivism claims that effective learning requires the deliberate, sequenced transmission of knowledge from expert to learner. Gagné (1965) identified nine conditions of instruction — from gaining attention to providing feedback — that, when applied systematically, produce reliable learning outcomes. For adult learners acquiring new domain knowledge, Ausubel's (1968) advance organisers prepare existing cognitive structure to receive new information meaningfully. Kirschner, Sweller and Clark (2006) extend this: without explicit instruction, novice learners are overwhelmed by the search process itself, consuming the cognitive resources needed for actual learning.</p>
+                    <p class="cite">Gagné, R. M. (1965). <em>The conditions of learning.</em> Holt, Rinehart &amp; Winston. | Ausubel, D. P. (1968). <em>Educational psychology: A cognitive view.</em> Holt, Rinehart &amp; Winston.</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Evidence -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Evidence</span>
+                        <span class="step-subtitle">A specific, grounded moment</span>
+                    </div>
+                </div>
+                <p class="step-description">Describe one concrete scenario from adult online learning that puts this claim to the test. Be specific: what was the task, the modality, the learner behaviour?</p>
+                <textarea class="input-area" id="inst-evidence" placeholder="Describe a single, detailed scenario from a real or plausible instructivist online learning context…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('inst-evidence-ex', this)">💡 See Example</button>
+                <div class="example-content" id="inst-evidence-ex">
+                    <h5>Example Evidence</h5>
+                    <p>In an online professional development programme for newly appointed school leaders, participants completed a series of structured, self-paced modules on financial management in education. Each module opened with a concept overview video (10–12 minutes), followed by a worked example narrated by a domain expert, a practice exercise with automated feedback, and a short knowledge check. Modules were sequenced from foundational budgeting principles through to complex multi-school financial planning. Learners could replay any segment and received knowledge check results immediately. At the end of the programme, 91% of participants passed a summative assessment on first attempt and reported high confidence in applying the material to their own school context.</p>
+                    <p class="cite">Illustrative scenario aligned with: Gagné, R. M. (1965). <em>The conditions of learning.</em> Holt, Rinehart &amp; Winston. | Sweller, J. (1988). Cognitive load during problem solving. <em>Cognitive Science, 12</em>(2), 257–285.</p>
+                </div>
+            </div>
+
+            <!-- Step 3: Mechanism -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Mechanism</span>
+                        <span class="step-subtitle">Why it works — or why it hinders</span>
+                    </div>
+                </div>
+                <p class="step-description">Explain the cognitive, social, or structural mechanism at play. What theoretical concepts — cognitive load, conditions of learning, schema formation — help explain the outcome?</p>
+                <textarea class="input-area" id="inst-mechanism" placeholder="e.g. Worked examples reduce extraneous cognitive load by providing a complete solution path, freeing working memory for schema formation (Sweller, 1988)…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('inst-mechanism-ex', this)">💡 See Example</button>
+                <div class="example-content" id="inst-mechanism-ex">
+                    <h5>Example Mechanism</h5>
+                    <p><strong>Why it worked:</strong> The modular sequence reduced extraneous cognitive load by presenting information in carefully managed chunks, preventing the split-attention and redundancy effects identified in Sweller's (1988) cognitive load theory. Worked examples gave learners complete solution paths to study before attempting problems independently — a technique consistently shown to accelerate schema formation in novices (Sweller, van Merriënboer &amp; Paas, 2019). Immediate automated feedback satisfied Gagné's (1965) eighth condition of instruction — providing knowledge of results — without requiring human instructor availability at scale.</p>
+                    <p><strong>Where it becomes limiting:</strong> The instructivist design excelled at building procedural competence — knowing how to apply rules — but offered little opportunity for the critical reflection and contextual judgement that Schön (1983) identifies as hallmarks of professional expertise. Gagné's model assumes stable, well-defined learning objectives; when the professional context is ambiguous or contested, direct instruction alone may not develop the adaptive capacity adult learners need.</p>
+                    <p class="cite">Sweller, J., van Merriënboer, J. J. G., &amp; Paas, F. (2019). Cognitive architecture and instructional design: 20 years later. <em>Educational Psychology Review, 31</em>(2), 261–292. | Schön, D. A. (1983). <em>The reflective practitioner.</em> Basic Books.</p>
+                </div>
+            </div>
+
+            <!-- Step 4: Impact -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Impact</span>
+                        <span class="step-subtitle">Effect on the adult online learner</span>
+                    </div>
+                </div>
+                <p class="step-description">What was the actual effect on learners? Consider engagement, depth of understanding, equity, motivation, and longer-term transfer of learning.</p>
+                <textarea class="input-area" id="inst-impact" placeholder="e.g. Structured sequencing reduced anxiety and enabled high completion rates, but the absence of dialogic engagement left learners without a community of practice to support transfer…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('inst-impact-ex', this)">💡 See Example</button>
+                <div class="example-content" id="inst-impact-ex">
+                    <h5>Example Impact</h5>
+                    <p><strong>Positive:</strong> Completion and pass rates were high. Participants who were new to financial management reported reduced anxiety: knowing exactly what to do and receiving instant confirmation that they had done it correctly built self-efficacy progressively — consistent with Bandura's (1977) model of mastery experience as the strongest source of self-efficacy. The self-paced format suited working adults managing professional and personal demands alongside study.</p>
+                    <p><strong>Negative:</strong> A follow-up survey six months later revealed that while participants could recall and apply the rules they had learned, fewer than half felt confident handling scenarios that deviated from the worked examples. No peer network had formed. Participants who had struggled with the foundational content had no social resource to turn to — they could replay the videos, but could not interrogate the reasoning behind the rules with others, a limitation Ausubel (1968) himself anticipated: meaningful learning requires connection to prior knowledge, not merely exposure to well-organised content.</p>
+                    <p class="cite">Bandura, A. (1977). Self-efficacy: Toward a unifying theory of behavioural change. <em>Psychological Review, 84</em>(2), 191–215. https://doi.org/10.1037/0033-295X.84.2.191</p>
+                </div>
+            </div>
+
+            <!-- Step 5: Scholarly Support -->
+            <div class="chain-step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title-group">
+                        <span class="step-title">Scholarly Support</span>
+                        <span class="step-subtitle">APA 7 references</span>
+                    </div>
+                </div>
+                <p class="step-description">Cite the key sources that ground your analysis. Use APA 7 format. Aim for seminal theoretical works alongside contemporary empirical studies.</p>
+                <textarea class="input-area support-area" id="inst-support" placeholder="Gagné, R. M. (1965)…&#10;Ausubel, D. P. (1968)…&#10;Kirschner, P. A., et al. (2006)…&#10;Sweller, J. (1988)…"></textarea>
+                <button class="example-toggle" onclick="toggleExample('inst-support-ex', this)">💡 See Example</button>
+                <div class="example-content" id="inst-support-ex">
+                    <h5>Example Scholarly Support (APA 7)</h5>
+                    <p>Ausubel, D. P. (1968). <em>Educational psychology: A cognitive view.</em> Holt, Rinehart &amp; Winston.</p>
+                    <p>Bandura, A. (1977). Self-efficacy: Toward a unifying theory of behavioural change. <em>Psychological Review, 84</em>(2), 191–215. https://doi.org/10.1037/0033-295X.84.2.191</p>
+                    <p>Gagné, R. M. (1965). <em>The conditions of learning.</em> Holt, Rinehart &amp; Winston.</p>
+                    <p>Kirschner, P. A., Sweller, J., &amp; Clark, R. E. (2006). Why minimal guidance during instruction does not work. <em>Educational Psychologist, 41</em>(2), 75–86. https://doi.org/10.1207/s15516709ep4102_1</p>
+                    <p>Schön, D. A. (1983). <em>The reflective practitioner: How professionals think in action.</em> Basic Books.</p>
+                    <p>Sweller, J. (1988). Cognitive load during problem solving. <em>Cognitive Science, 12</em>(2), 257–285. https://doi.org/10.1207/s15516709cog1202_4</p>
+                    <p>Sweller, J., van Merriënboer, J. J. G., &amp; Paas, F. (2019). Cognitive architecture and instructional design: 20 years later. <em>Educational Psychology Review, 31</em>(2), 261–292. https://doi.org/10.1007/s10648-019-09465-5</p>
+                </div>
+            </div>
+
+        </div><!-- end instructivism-chain -->
+
+
+        <!-- Action buttons -->
+        <div class="action-buttons">
+            <button class="action-button save-button" onclick="saveChain()">
+                💾 Save Progress
+            </button>
+            <button class="action-button clear-button" onclick="clearChain()">
+                🗑️ Clear Current
+            </button>
+            <button class="action-button export-button" onclick="exportChain()">
+                📥 Export as Text
+            </button>
+            <button class="action-button compare-button" onclick="toggleComparison()">
+                ⚖️ Compare Both
+            </button>
+        </div>
+
+        <div class="saved-message" id="saved-message">
+            ✓ Progress saved! Your work is stored in your browser.
+        </div>
+
+        <!-- Comparison view -->
+        <div class="comparison-view" id="comparison-view">
+            <h2>⚖️ Side-by-Side Comparison</h2>
+            <p class="comparison-sub">Your completed chains placed in dialogue with each other.</p>
+            <div class="comparison-grid">
+                <div class="comparison-column constructivism">
+                    <h3>📚 Social Constructivism</h3>
+                    <div id="comparison-constructivism"></div>
+                </div>
+                <div class="comparison-column instructivism">
+                    <h3>🎓 Instructivism</h3>
+                    <div id="comparison-instructivism"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- end .content -->
+</div><!-- end .container -->
+
+<script>
+    let currentTheory = 'constructivism';
+
+    function showTheory(theory, btn) {
+        currentTheory = theory;
+
+        // Update buttons
+        document.querySelectorAll('.theory-button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update chains
+        document.querySelectorAll('.chain-container').forEach(c => c.classList.remove('active'));
+        document.getElementById(theory + '-chain').classList.add('active');
+
+        // Hide comparison
+        document.getElementById('comparison-view').classList.remove('show');
+    }
+
+    function toggleExample(id, btn) {
+        const el = document.getElementById(id);
+        const open = el.classList.toggle('show');
+        btn.textContent = open ? '🙈 Hide Example' : '💡 See Example';
+    }
+
+    function saveChain() {
+        const data = {
+            constructivism: {
+                claim:     document.getElementById('sc-claim').value,
+                evidence:  document.getElementById('sc-evidence').value,
+                mechanism: document.getElementById('sc-mechanism').value,
+                impact:    document.getElementById('sc-impact').value,
+                support:   document.getElementById('sc-support').value
+            },
+            instructivism: {
+                claim:     document.getElementById('inst-claim').value,
+                evidence:  document.getElementById('inst-evidence').value,
+                mechanism: document.getElementById('inst-mechanism').value,
+                impact:    document.getElementById('inst-impact').value,
+                support:   document.getElementById('inst-support').value
+            }
+        };
+        localStorage.setItem('theoryChains', JSON.stringify(data));
+
+        const msg = document.getElementById('saved-message');
+        msg.classList.add('show');
+        setTimeout(() => msg.classList.remove('show'), 3000);
+    }
+
+    function loadChain() {
+        const saved = localStorage.getItem('theoryChains');
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        const map = [
+            ['sc-claim', data.constructivism?.claim],
+            ['sc-evidence', data.constructivism?.evidence],
+            ['sc-mechanism', data.constructivism?.mechanism],
+            ['sc-impact', data.constructivism?.impact],
+            ['sc-support', data.constructivism?.support],
+            ['inst-claim', data.instructivism?.claim],
+            ['inst-evidence', data.instructivism?.evidence],
+            ['inst-mechanism', data.instructivism?.mechanism],
+            ['inst-impact', data.instructivism?.impact],
+            ['inst-support', data.instructivism?.support]
+        ];
+        map.forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (el && val) el.value = val;
+        });
+    }
+
+    function clearChain() {
+        if (!confirm('Clear all fields in the current chain?')) return;
+        const prefix = currentTheory === 'constructivism' ? 'sc' : 'inst';
+        ['claim','evidence','mechanism','impact','support'].forEach(step => {
+            const el = document.getElementById(prefix + '-' + step);
+            if (el) el.value = '';
+        });
+    }
+
+    function exportChain() {
+        const steps = ['claim','evidence','mechanism','impact','support'];
+        const labels = ['Claim (Theory)','Evidence (Moment)','Mechanism (Why it works / hinders)','Impact (Adult Online Learner)','Scholarly Support (APA 7)'];
+
+        let text = 'THEORY CHAIN ANALYSIS\n' + '='.repeat(80) + '\n\n';
+
+        [['sc','SOCIAL CONSTRUCTIVISM'], ['inst','INSTRUCTIVISM']].forEach(([prefix, title]) => {
+            text += title + '\n' + '-'.repeat(80) + '\n\n';
+            steps.forEach((step, i) => {
+                const val = document.getElementById(prefix + '-' + step)?.value?.trim();
+                text += `${i+1}. ${labels[i]}:\n${val || '[Not completed]'}\n\n`;
+            });
+            text += '\n';
+        });
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'theory-chain-analysis.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function toggleComparison() {
+        const view = document.getElementById('comparison-view');
+        const showing = view.classList.contains('show');
+        if (!showing) {
+            buildComparison();
+            view.classList.add('show');
+            view.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            view.classList.remove('show');
+        }
+    }
+
+    function buildComparison() {
+        const steps = ['claim','evidence','mechanism','impact','support'];
+        const labels = ['Claim','Evidence','Mechanism','Impact','Scholarly Support'];
+
+        ['sc','inst'].forEach(prefix => {
+            const targetId = prefix === 'sc' ? 'comparison-constructivism' : 'comparison-instructivism';
+            let html = '';
+            steps.forEach((step, i) => {
+                const val = document.getElementById(prefix + '-' + step)?.value?.trim();
+                html += `<div class="comparison-item">
+                    <h4>${i+1}. ${labels[i]}</h4>
+                    <p>${val || '<span class="empty-state">Not yet completed</span>'}</p>
+                </div>`;
+            });
+            document.getElementById(targetId).innerHTML = html;
+        });
+    }
+
+    // Load on start
+    window.addEventListener('load', loadChain);
+
+    // Auto-save on input
+    let autoSaveTimer;
+    document.querySelectorAll('.input-area').forEach(ta => {
+        ta.addEventListener('input', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveChain, 2000);
+        });
+    });
+</script>
+
+</body>
+</html>
